@@ -28,6 +28,7 @@ env:
   AWS_REGION: ${{secrets.AWS_REGION}}
   AWS_PROFILE: ${{secrets.AWS_PROFILE}}
   AWS_OIDC_ROLE: ${{ secrets.AWS_OIDC_ROLE }}
+  DISTRIBUTION_ID: ${{ secrets.DISTRIBUTION_ID }}
 
 jobs:
   frontend:
@@ -73,3 +74,22 @@ jobs:
         run: |
           cd deploy
           sls deploy --stage ${{ inputs.environment }}
+
+      - name: Upload Frontend to S3 
+        if: ${{ inputs.service == 'frontend' }} 
+        run: | 
+          BUCKET_NAME="bigosys-frontend-${{ inputs.environment }}" 
+          
+          aws s3 sync . s3://$BUCKET_NAME \ 
+            --exclude ".git/*" \ 
+            --exclude ".github/*" \ 
+            --exclude "deploy/*" \ 
+            --exclude ".idea/*" \ 
+            --delete 
+            
+      - name: Invalidate CloudFront 
+        if: ${{ inputs.service == 'frontend' }} 
+        run: | 
+          aws cloudfront create-invalidation \ 
+            --distribution-id $DISTRIBUTION_ID \ 
+            --paths "/*"
