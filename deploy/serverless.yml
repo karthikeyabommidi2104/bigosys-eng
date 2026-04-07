@@ -10,75 +10,90 @@ provider:
 
 resources:
   Resources:
-    # Create s3 bucket
-    S3Bucket:
-      Type: 'AWS::S3::Bucket'
-      Properties:
-        AccessControl: BucketOwnerFullControl
-        WebsiteConfiguration:
-          IndexDocument: index.html
-          ErrorDocument: index.html
 
-    # Allow public read
-    S3PublicReadPolicy:
+    # -----------------------------
+    # S3 Bucket (PRIVATE)
+    # -----------------------------
+    S3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: !Sub 'bigosys-frontend-${sls:stage}'
+        AccessControl: Private
+
+    # -----------------------------
+    # CloudFront Origin Access Identity
+    # -----------------------------
+    WebCloudFrontOAI:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: !Sub 'OAI for ${S3Bucket}'
+
+    # -----------------------------
+    # Bucket Policy (Allow CF only)
+    # -----------------------------
+    S3BucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
-        Bucket: !Sub '${S3Bucket}'
+        Bucket: !Ref S3Bucket
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
-            - Sid: PublicReadForGetBucketObjects
+            - Sid: AllowCloudFrontRead
               Effect: Allow
               Principal:
-                CanonicalUser:
-                  !GetAtt [CloudFrontOAI, S3CanonicalUserId]
+                CanonicalUser: !GetAtt WebCloudFrontOAI.S3CanonicalUserId
               Action: s3:GetObject
               Resource: !Sub '${S3Bucket.Arn}/*'
 
-    # Cloudfront distribution
+    # -----------------------------
+    # CloudFront Distribution
+    # -----------------------------
     CloudfrontDistribution:
       Type: AWS::CloudFront::Distribution
       Properties:
         DistributionConfig:
+          Enabled: true
+          IPV6Enabled: true
+          DefaultRootObject: index.html
+
           Aliases:
-            - 'www.bigosys.com'
+            - www.bigosys.com
+
+          Origins:
+            - Id: S3Origin
+              DomainName: !GetAtt S3Bucket.RegionalDomainName
+              S3OriginConfig:
+                OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${WebCloudFrontOAI}'
+
+          DefaultCacheBehavior:
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+
           CustomErrorResponses:
+            - ErrorCode: 403
+              ResponseCode: 200
+              ResponsePagePath: /index.html
             - ErrorCode: 404
               ResponseCode: 200
               ResponsePagePath: /index.html
-          DefaultCacheBehavior:
-            Compress: true
-            ForwardedValues:
-              Cookies:
-                Forward: none
-              Headers: []
-              QueryString: false
-            TargetOriginId: s3
-            ViewerProtocolPolicy: redirect-to-https
-          DefaultRootObject: index.html
-          Enabled: true
-          IPV6Enabled: true
-          Origins:
-            - DomainName: !Sub '${sWebS3Bucket.DomainName}'
-              Id: s3
-              S3OriginConfig:
-                OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${WebCloudFrontOAI}'
-          ViewerCertificate:
-            AcmCertificateArn: 'arn:aws:acm:us-east-1:483518901596:certificate/dbc01f23-3ec4-4b16-8127-b7a0c0d71e50'
-            MinimumProtocolVersion: TLSv1.2_2021
-            SslSupportMethod: sni-only
 
-    # Cloudfront OAI
-    WebCloudFrontOAI:
-      Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
-      Properties:
-        CloudFrontOriginAccessIdentityConfig:
-          Comment: !Sub 'OAI for ${WebS3Bucket}'
+          ViewerCertificate:
+            AcmCertificateArn: arn:aws:acm:us-east-1:483518901596:certificate/dbc01f23-3ec4-4b16-8127-b7a0c0d71e50
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
 
   Outputs:
-    Bucket:
-      Value: !Sub '${WebS3Bucket}'
-      Description: ID of the Web Bucket
-    URL:
-      Value: !Sub '${WebCloudfrontDistribution.DomainName}'
-      Description: URL for Cloudfront Distribution
+    BucketName:
+      Description: S3 Bucket Name
+      Value: !Ref S3Bucket
+
+    CloudFrontURL:
+      Description: CloudFront Distribution URL
+      Value: !GetAtt CloudfrontDistribution.DomainName
