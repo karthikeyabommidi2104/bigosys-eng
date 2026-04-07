@@ -4,7 +4,7 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  profile: evolus_${sls:stage}
+  profile: bigosys_${sls:stage}
   region: us-east-1
   timeout: 30
 

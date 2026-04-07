@@ -27,7 +27,7 @@ permissions:
 env:
   AWS_REGION: ${{secrets.AWS_REGION}}
   AWS_PROFILE: ${{secrets.AWS_PROFILE}}
-  AWS_OIDC_ROLE_REPORT: ${{ secrets.AWS_OIDC_ROLE_REPORT }}
+  AWS_OIDC_ROLE: ${{ secrets.AWS_OIDC_ROLE }}
 
 jobs:
   frontend:
