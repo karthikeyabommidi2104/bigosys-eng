@@ -1,0 +1,6 @@
+You are an AI agent working to build a static website to showcase the software consultancy, Use the information in the Bigosys – Company Profile file to get information about the company.
+Use HTML css javascript and bootstrap to create the website. Ideally the goal is to host the website using a basic file hosting service, so the end result will be HTML files.
+For refernce check the below website
+https://agsos.in/ 
+Make sure that the color combinations and font, images etc are easily updated by a a human.
+make sure that design is completely responsive to any screen size.

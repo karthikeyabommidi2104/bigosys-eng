@@ -1,0 +1,185 @@
+/* 
+   BIGOSYS - Stylesheet
+   Easily updated by a human via CSS Variables 
+*/
+
+:root {
+    /* Colors - Agsos Inspired Palette (Professional Deep Blue & Cyan) */
+    --primary-color: #0066ff; /* Vibrant Tech Blue */
+    --primary-dark: #0052cc; 
+    --accent-color: #00d4ff; /* Bright Cyan Accent */
+    --dark-blue: #0a192f; /* Deep Navy for headers/sections */
+    --light-bg: #f4f7fa; 
+    --white: #ffffff;
+    --text-dark: #1a202c;
+    --text-muted: #4a5568;
+
+    /* Fonts */
+    --font-heading: 'Poppins', sans-serif;
+    --font-body: 'Inter', sans-serif;
+
+    /* Spacing */
+    --section-padding: 100px;
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--text-dark);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.bg-dark {
+    background-color: var(--dark-blue) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.bg-light {
+    background-color: var(--light-bg) !important;
+}
+
+.section-padding {
+    padding: var(--section-padding) 0;
+}
+
+.section-title {
+    font-size: 3.25rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    display: inline-block;
+}
+
+.text-dark-blue {
+    color: var(--dark-blue);
+}
+
+.max-width-600 {
+    max-width: 600px;
+}
+
+/* Navbar */
+.navbar {
+    transition: all 0.3s ease;
+}
+
+.navbar-brand {
+    transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: translateY(-2px);
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.nav-link:hover {
+    color: var(--primary-color);
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 80vh;
+    background: linear-gradient(135deg, var(--white) 0%, #e6f0ff 100%);
+}
+
+/* Service Cards */
+.service-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 1rem;
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+}
+
+/* Process Steps */
+.step-number {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+.text-light-50 {
+    color: rgba(255,255,255,0.7);
+}
+
+/* Process Arrows */
+.process-arrow {
+    position: absolute;
+    top: 30px; /* Aligned with step-number center */
+    right: -25px;
+    z-index: 1;
+    transform: translateY(-50%);
+}
+
+@media (max-width: 991px) {
+    .process-arrow {
+        right: -15px;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    :root {
+        --section-padding: 60px;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .hero-section {
+        text-align: center;
+    }
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Animations */
+.fade-in-section {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
