@@ -1,0 +1,75 @@
+name: Frontend
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select environment to deployment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - 'dev'
+
+      service:
+        description: 'Select service to deployment'
+        required: true
+        default: 'Infra'
+        type: choice
+        options:
+          - 'Infra'
+          - 'frontend'
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{secrets.AWS_REGION}}
+  AWS_PROFILE: ${{secrets.AWS_PROFILE}}
+  AWS_OIDC_ROLE_REPORT: ${{ secrets.AWS_OIDC_ROLE_REPORT }}
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    environment: '${{ inputs.environment }}'
+    name: Deploy "${{ inputs.service }}" to "${{ inputs.environment }}"
+
+    steps:
+      - name: Extract branch name
+        run: |
+          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Serverless
+        run: npm install -g serverless@3
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ env.AWS_OIDC_ROLE }}
+          role-session-name: Github_action_session_${{ inputs.environment }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Create AWS CLI profile
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile ${{ env.AWS_PROFILE }}
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile ${{ env.AWS_PROFILE }}
+          aws configure set aws_session_token $AWS_SESSION_TOKEN --profile ${{ env.AWS_PROFILE }}
+          aws configure set output json --profile ${{ env.AWS_PROFILE }}
+          aws configure set region ${{ env.AWS_REGION }} --profile ${{ env.AWS_PROFILE }}
+
+      - name: Deploy
+        if: ${{ inputs.service == 'Infra' }}
+        run: |
+          cd deploy
+          sls deploy --stage ${{ inputs.environment }}
