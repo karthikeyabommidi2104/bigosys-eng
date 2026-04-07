@@ -80,16 +80,16 @@ jobs:
         run: | 
           BUCKET_NAME="bigosys-frontend-${{ inputs.environment }}" 
           
-          aws s3 sync . s3://$BUCKET_NAME \ 
-            --exclude ".git/*" \ 
+          aws s3 sync . s3://$BUCKET_NAME \
+            --exclude ".git/*" \
             --exclude ".github/*" \ 
-            --exclude "deploy/*" \ 
-            --exclude ".idea/*" \ 
-            --delete 
+            --exclude "deploy/*" \
+            --exclude ".idea/*" \
+            --delete
             
       - name: Invalidate CloudFront 
         if: ${{ inputs.service == 'frontend' }} 
         run: | 
-          aws cloudfront create-invalidation \ 
+          aws cloudfront create-invalidation \
             --distribution-id $DISTRIBUTION_ID \ 
             --paths "/*"
